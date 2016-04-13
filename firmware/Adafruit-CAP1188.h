@@ -21,6 +21,8 @@
 
 // The default I2C address
 #define CAP1188_I2CADDR 0x29
+// Wire a cable from the 3V to the AD pin in order to pass this address to the constructor
+#define CAP1188_I2C2NDADDR 0x28
 
 // Some registers we use
 #define CAP1188_SENINPUTSTATUS 0x3
@@ -36,14 +38,15 @@
 
 //newly added
 #define CAP1188_ANALOGID 0x10// returns analog values
-#define CAP1188_SENSITIVITY 0x42// controls sensitivity
+#define CAP1188_SENSITIVITY 0x42// controls standby sensitivity
+#define CAP188_SENSITIVYCONTROL 0x1F// controls sensitivity as well
 
 class Adafruit_CAP1188 {
  public:
   // Software SPI
   Adafruit_CAP1188(int8_t clkpin, int8_t misopin,
-		   int8_t mosipin,int8_t cspin,
-		   int8_t resetpin);
+       int8_t mosipin,int8_t cspin,
+       int8_t resetpin);
   // Hardware SPI
   Adafruit_CAP1188(int8_t cspin, int8_t resetpin);
   // Hardware I2C

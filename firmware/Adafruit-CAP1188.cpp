@@ -10,12 +10,16 @@
   please support Adafruit and open-source hardware by purchasing
   products from Adafruit!
 
+  If you're using multiple sensors, or you just want to change the I2C address
+  to something else, you can choose from
+  5 different options - 0x28, 0x29 (default), 0x2A, 0x2B, 0x2C and 0x2D
+
   Written by Limor Fried/Ladyada for Adafruit Industries.
   BSD license, all text above must be included in any redistribution
   **** THIS LIBRARY ONLY IMPLEMENTS IC2 PROTOCOL ****
  ****************************************************/
 
-#include "Adafruit_CAP1188.h"
+#include "Adafruit-CAP1188.h"
 
 uint8_t mySPCR, SPCRback;
 
@@ -34,8 +38,8 @@ Adafruit_CAP1188::Adafruit_CAP1188(int8_t cspin, int8_t resetpin) {
 }
 
 Adafruit_CAP1188::Adafruit_CAP1188(int8_t clkpin, int8_t misopin,
-				   int8_t mosipin,int8_t cspin,
-				   int8_t resetpin) {
+           int8_t mosipin,int8_t cspin,
+           int8_t resetpin) {
   // Software SPI
   _cs = cspin;
   _resetpin = resetpin;
@@ -66,12 +70,12 @@ boolean Adafruit_CAP1188::begin(uint8_t i2caddr) {
 
   // Useful debugging info
 
-  Serial.print("Product ID: 0x");
-  Serial.println(readRegister(CAP1188_PRODID), HEX);
-  Serial.print("Manuf. ID: 0x");
-  Serial.println(readRegister(CAP1188_MANUID), HEX);
-  Serial.print("Revision: 0x");
-  Serial.println(readRegister(CAP1188_REV), HEX);
+  // Serial.print("Product ID: 0x");
+  // Serial.println(readRegister(CAP1188_PRODID), HEX);
+  // Serial.print("Manuf. ID: 0x");
+  // Serial.println(readRegister(CAP1188_MANUID), HEX);
+  // Serial.print("Revision: 0x");
+  // Serial.println(readRegister(CAP1188_REV), HEX);
 
   if ( (readRegister(CAP1188_PRODID) != 0x50) ||
        (readRegister(CAP1188_MANUID) != 0x5D) ||
@@ -84,17 +88,25 @@ boolean Adafruit_CAP1188::begin(uint8_t i2caddr) {
   writeRegister(CAP1188_LEDLINK, 0xFF);
   // speed up a bit
   writeRegister(CAP1188_STANDBYCFG, 0x30);
+  // we change sensitivity here
+  // writeRegister(CAP188_SENSITIVYCONTROL, 0x50);// ideal sensitivity without ground
 
-  // we set the sensitivity
-  /*writeRegister(CAP1188_SENSITIVITY, 0x2F);
-  Serial.print("Sensitivity: 0x");
-  Serial.println(readRegister(CAP1188_SENSITIVITY), HEX);*/
+  // setSensitivity(1);
+  // writeRegister(CAP188_SENSITIVYCONTROL, 0x70);
+  // Serial.print("Sensitivity in BIN: ");
+  // Serial.println(readRegister(CAP188_SENSITIVYCONTROL), BIN);
 
-  Serial.print("MultiTouch: 0x");
-  Serial.println(readRegister(CAP1188_MTBLK), HEX);
+  // Serial.print("Sensitivity: 0x");
+  // Serial.println(readRegister(CAP1188_SENSITIVITY), HEX);
+
+  // Serial.print("MultiTouch: 0x");
+  // Serial.println(readRegister(CAP1188_MTBLK), HEX);
   //BIT DECODE for number of samples taken
-  Serial.print("bit decode samples taken: 0x");
-  Serial.println(readRegister(CAP1188_STANDBYCFG), HEX);
+  // Serial.print("bit decode samples taken: 0x");
+  // Serial.println(readRegister(CAP1188_STANDBYCFG), HEX);
+
+  // writeRegister(CAP188_SENSITIVYCONTROL, 0x30);
+
 
   return true;
 }
@@ -105,37 +117,35 @@ void Adafruit_CAP1188::setSensitivity(int sensitivity){
 
     //least sensitive
     case 1:
-      writeRegister(CAP1188_SENSITIVITY,0x7);
+      writeRegister(CAP188_SENSITIVYCONTROL,0x70);
       break;
-
     case 2:
-      writeRegister(CAP1188_SENSITIVITY,0x6);
+      writeRegister(CAP188_SENSITIVYCONTROL,0x60);
       break;
-
     case 3:
-      writeRegister(CAP1188_SENSITIVITY,0x5);
+      writeRegister(CAP188_SENSITIVYCONTROL,0x50);
       break;
-
     case 4:
-      writeRegister(CAP1188_SENSITIVITY,0x4);
+      writeRegister(CAP188_SENSITIVYCONTROL,0x40);
       break;
-
     case 5:
-      writeRegister(CAP1188_SENSITIVITY,0x3);
+      writeRegister(CAP188_SENSITIVYCONTROL,0x30);
       break;
-
     case 6:
-      writeRegister(CAP1188_SENSITIVITY,0x2);
+      writeRegister(CAP188_SENSITIVYCONTROL,0x20);
+      break;
+    case 7:
+      writeRegister(CAP188_SENSITIVYCONTROL,0x10);
       break;
     //most sensitive
-    case 7:
-      writeRegister(CAP1188_SENSITIVITY,0x1);
+    case 8:
+      writeRegister(CAP188_SENSITIVYCONTROL, 0);
       break;
   }
 
   //Let's read how sensible the sensor is
-  Serial.print("Sensitivity: 0x");
-  Serial.println(readRegister(CAP1188_SENSITIVITY), HEX);
+  Serial.print("Sensitivity in HEX: 0x");
+  Serial.println(readRegister(CAP188_SENSITIVYCONTROL), HEX);
 
 }
 
@@ -197,7 +207,7 @@ uint8_t Adafruit_CAP1188::spixfer(uint8_t data) {
       digitalWrite(_mosi, data & (1<<i));
       digitalWrite(_clk, HIGH);
       if (digitalRead(_miso))
-	reply |= 1;
+  reply |= 1;
     }
     return reply;
   }
